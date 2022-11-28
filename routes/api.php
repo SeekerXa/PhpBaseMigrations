@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\CityController;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,6 +15,15 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+Route::get('/test', function () {
+    echo 'test';
 });
+
+
+Route::get('/cities', [CityController::class, 'list']);
+
+Route::post('/cities', [CityController::class, 'create']);
+
+Route::put('/cities/{id}', [CityController::class, 'update']);
+
+Route::delete('/cities/{id}', [CityController::class, 'destroy']);

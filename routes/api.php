@@ -3,7 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CityController;
-
+use App\Api\GeoapifyClitent;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -27,3 +27,5 @@ Route::post('/cities', [CityController::class, 'create']);
 Route::put('/cities/{id}', [CityController::class, 'update']);
 
 Route::delete('/cities/{id}', [CityController::class, 'destroy']);
+
+Route::get('/geotest', [CityController::class, 'testgeo']);

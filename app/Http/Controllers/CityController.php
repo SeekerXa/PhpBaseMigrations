@@ -2,13 +2,27 @@
 
 namespace App\Http\Controllers;
 
-use Hamcrest\Core\IsEqual;
-use Illuminate\Http\Request;
+
+
 use App\Models\City;
+use Hamcrest\Core\IsEqual;
+use App\Api\GeoapifyClient;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+
+
+
+
 
 class CityController extends Controller
 {
+     protected GeoapifyClient $apiGeoRequest;
+    public function __construct(GeoapifyClient $apiGeoRequest)
+    {
+        $this->apiGeoRequest = $apiGeoRequest;
+    }
+
+
     public function list(): string
     {
         $cities = DB::table('cities')->get();
@@ -17,10 +31,11 @@ class CityController extends Controller
 
     public function create(Request $request): string
     {
+        $cords = $this->apiGeoRequest->getCoordinates($request->name);
         $city = new City;
         $city->name = $request->name;
-        $city->lat = $request->lat;
-        $city->lon = $request->lon;
+        $city->lat = $cords['lat'];
+        $city->lon = $cords['lon'];
         $city->save();
         return json_encode($city);
     }
@@ -29,12 +44,13 @@ class CityController extends Controller
     {
         if($request->id != NULL){
 
+            $cords = $this->apiGeoRequest->getCoordinates($request->name);
             DB::table('cities')
             ->where('id', $id)
             ->update(
                 ['name'=> $request->name,
-                'lat'=> $request->lat,
-                'lon'=> $request->lon
+                'lat'=> $cords['lat'],
+                'lon'=> $cords['lon']
                 ]
             );
         }
@@ -46,4 +62,14 @@ class CityController extends Controller
         ->where('id', $id)
         ->delete();
     }
+
+    public function testgeo(Request $request)
+    {
+        
+       
+
+        $this->apiGeoRequest->getCoordinates($request->name);
+        
+    }
+
 }

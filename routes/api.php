@@ -21,6 +21,7 @@ Route::get('/test', function () {
 
 
 Route::get('/cities', [CityController::class, 'list']);
+Route::get('/weathers', [CityController::class, 'listWeather']);
 
 Route::post('/cities', [CityController::class, 'create']);
 
@@ -28,4 +29,10 @@ Route::put('/cities/{id}', [CityController::class, 'update']);
 
 Route::delete('/cities/{id}', [CityController::class, 'destroy']);
 
-Route::get('/geotest', [CityController::class, 'testgeo']);
+Route::get('/addweather', [CityController::class, 'addWeather']);
+
+Route::get('/testweather', [CityController::class, 'testweather']);
+
+Route::get('/testgeo', [CityController::class, 'testgeo']);
+
+Route::get('/testHasMany', [CityController::class, 'testHasMany']);

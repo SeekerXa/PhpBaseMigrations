@@ -2,23 +2,20 @@
 
 namespace App\Http\Controllers;
 
-
-
+use App\Http\Controllers\Traits\ControllerResponse;
 use App\Models\City;
-use App\Models\Weather;
-use Hamcrest\Core\IsEqual;
 use App\Api\GeoapifyClient;
 use Illuminate\Http\Request;
 use App\Api\WeatherapifyClient;
 use Illuminate\Support\Facades\DB;
-
-
-
-
+use Illuminate\Support\Facades\Validator;
+use Symfony\Component\HttpFoundation\JsonResponse;
 
 class CityController extends Controller
 {
-     protected GeoapifyClient $apiGeoRequest;
+    use ControllerResponse;
+
+    protected GeoapifyClient $apiGeoRequest;
      protected WeatherapifyClient $apiWeatherRequest;
 
     public function __construct(GeoapifyClient $apiGeoRequest, WeatherapifyClient $apiWeatherRequest)
@@ -27,70 +24,99 @@ class CityController extends Controller
         $this->apiWeatherRequest = $apiWeatherRequest;
     }
 
-
-    public function list(): string
+    public function list(): JsonResponse
     {
         $cities = DB::table('cities')->get();
-        return $cities;
+
+        return $this->jsonResponse($cities);
     }
 
-    public function listWeather(): string
+    public function listWeather(): JsonResponse
     {
-        
         $weather = DB::table('weather')->get();
-        return $weather;
+
+        return $this->jsonResponse($weather);
     }
 
-    public function create(Request $request): string
+    public function validationErrors($request): ?array
     {
+        $validator = Validator::make($request->all(), [
+            'name' => 'alpha|required|max:255',
+         ]);
+      
+         if($validator->fails())
+         {
+            return $validator->errors()->toArray();
+         }
+         else
+         {
+            return null;
+         }
+    }
+
+    public function idValidation(int $id): bool
+    {
+        if(City::where('id', $id)->exists()) {
+
+            return true;
+        }
+        // echo 'missing id';
+        return false;
+    }
+    public function create(Request $request): JsonResponse
+    {
+        if ($errors = $this->validationErrors($request)) {
+
+            return $this->jsonValidate($errors);
+        }
         $cords = $this->apiGeoRequest->getCoordinates($request->name);
         $city = new City;
         $city->name = $request->name;
         $city->lat = $cords['lat'];
         $city->lon = $cords['lon'];
         $city->save();
-        return json_encode($city);
+
+        return $this->jsonCreate();
     }
 
-    public function addWeather(Request $request) 
+    
+
+    public function update(Request $request, int $id): JsonResponse
     {
-        $cities = DB::select('select * from cities');
+
+        if($errors = $this->validationErrors($request)){
+            return $this->jsonValidate($errors);
+        }
+
+        if(!$this->idValidation($id)){
+            return $this->jsonMissingId();
+        }
+
+        $cords = $this->apiGeoRequest->getCoordinates($request->name);
+        $city=DB::table('cities')
+         ->where('id', $id)
+         ->update(
+             ['name'=> $request->name,
+            'lat'=> $cords['lat'],
+             'lon'=> $cords['lon']
+             ]
+        );
+        return $this->jsonResponse($city);
         
-        foreach ($cities as $city) {
-
-            $weather = new Weather;
-            echo $city->name;
-            $data = $this->apiWeatherRequest->getWeather($city->lat, $city->lon);
-            $weather->temperature = $data['temperature'];
-            $weather->pressure = $data['pressure'];
-            $weather->precipitation = $data['precipitation'];
-            $weather->wind_speed = $data['wind_speed'];
-
-        }
-
     }
 
-    public function update(Request $request,int $id)
+    public function destroy(Request $request,int $id): JsonResponse
     {
-        if($request->id != NULL){
-
-            $cords = $this->apiGeoRequest->getCoordinates($request->name);
-            DB::table('cities')
-            ->where('id', $id)
-            ->update(
-                ['name'=> $request->name,
-                'lat'=> $cords['lat'],
-                'lon'=> $cords['lon']
-                ]
-            );
+        if(!$this->idValidation($id))
+        {
+            return $this->jsonMissingId();
         }
-    }
-
-    public function destroy(Request $request,int $id)
-    {
+        $this->idValidation($id);
         DB::table('cities')
         ->where('id', $id)
         ->delete();
+
+        return $this->jsonDelete();
     }
 
     public function testgeo(Request $request)
@@ -100,7 +126,7 @@ class CityController extends Controller
 
     public function testweather(Request $request)
     {
-        $this->apiWeatherRequest->getWeather();
+        $this->apiWeatherRequest->getWeather(12,12);
     }
 
     public function testHasMany(Request $request)
@@ -108,6 +134,4 @@ class CityController extends Controller
         $city = new City;
         echo($city->weathers()->count());
     }
-    
-
 }

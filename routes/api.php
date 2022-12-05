@@ -1,9 +1,6 @@
 <?php
-
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CityController;
-use App\Api\GeoapifyClitent;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -14,12 +11,6 @@ use App\Api\GeoapifyClitent;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
-
-Route::get('/test', function () {
-    echo 'test';
-});
-
-
 Route::get('/cities', [CityController::class, 'list']);
 Route::get('/weathers', [CityController::class, 'listWeather']);
 

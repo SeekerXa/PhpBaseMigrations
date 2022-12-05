@@ -6,6 +6,7 @@ use App\Models\Weather;
 use App\Api\WeatherapifyClient;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class CheckWeather extends Command
 {
@@ -34,13 +35,14 @@ class CheckWeather extends Command
      */
     public function handle()
     {
+        Log::info('check-weather was started!');
         $cities = DB::select('select * from cities');
         $temp= new WeatherapifyClient;
 
         foreach ($cities as $city) {
 
             $weather = new Weather;
-          
+           
             $data = $temp->getWeather($city->lat, $city->lon);
             $weather->temperature = $data['temperature'];
             $weather->pressure = $data['pressure'];

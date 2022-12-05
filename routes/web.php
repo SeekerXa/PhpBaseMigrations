@@ -1,8 +1,7 @@
 <?php
-use Illuminate\Http\Request;
+
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\CityController;
-use App\Api\GeoapifyClitent;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -17,4 +16,3 @@ use App\Api\GeoapifyClitent;
 Route::get('/', function () {
     return view('welcome');
 });
-

@@ -16,7 +16,7 @@ return new class extends Migration
         Schema::create('weather', function (Blueprint $table) {
             $table->id()->unique();
             $table->unsignedBigInteger('city_id');
-            $table->foreign('city_id')->references('id')->on('cities');
+            $table->foreign('city_id')->references('id')->on('cities')->cascadeOnDelete();
             $table->float('temperature', 4, 2)->nullable();
             $table->float('pressure', 6, 2)->nullable();
             $table->float('precipitation', 4, 2)->nullable();
@@ -32,7 +32,7 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('weathers');
+        Schema::dropIfExists('weather');
     }
 };
 

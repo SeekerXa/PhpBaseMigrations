@@ -9,13 +9,10 @@ use Illuminate\Support\Arr;
 
 
 class GeoapifyClient 
-{
-
-    private $cityName;
+{    private $cityName;
 
     public function getCoordinates(string $cityName): array
     {
-       
         $response = Http::get('https://api.geoapify.com/v1/geocode/search?', [
         
             'city' => $cityName,
@@ -31,8 +28,7 @@ class GeoapifyClient
             'lon' => $lon,
             'lat' => $lat
         );
-        echo json_encode($cords);
+        //echo json_encode($cords);
         return $cords;
     }
-
 };

@@ -7,19 +7,15 @@ use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Arr;
 
+
 class GeoapifyClient 
 {
 
     private $cityName;
 
-   
-
-    // która zwróci koordynaty w tablicy
-    // [ 'lat' => XX.XXXX, 'lon' => 'XX.XXXXXX']
     public function getCoordinates(string $cityName): array
     {
        
-
         $response = Http::get('https://api.geoapify.com/v1/geocode/search?', [
         
             'city' => $cityName,
@@ -35,22 +31,8 @@ class GeoapifyClient
             'lon' => $lon,
             'lat' => $lat
         );
-
+        echo json_encode($cords);
         return $cords;
     }
 
-
-
-
-
-
-
-
 };
-
-   // protected GeoapifyClient $client;
-    // public function __construct(GeoapifyClient $client)
-    // {
-    //     $this->client = $client;
-    // }
- 

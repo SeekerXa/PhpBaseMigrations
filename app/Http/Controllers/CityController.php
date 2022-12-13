@@ -2,26 +2,31 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Traits\ControllerResponse;
+use App\CommandBus;
+use App\Mail\AlertMail;
 use App\Models\City;
+use App\Models\Weather;
 use App\Api\GeoapifyClient;
 use Illuminate\Http\Request;
 use App\Api\WeatherapifyClient;
 use Illuminate\Support\Facades\DB;
+use App\Commands\CreateCityCommand;
+use Illuminate\Support\Facades\Mail;
+use App\Validators\CreateCityValidator;
 use Illuminate\Support\Facades\Validator;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use App\Http\Controllers\Traits\ControllerResponse;
 
 class CityController extends Controller
 {
     use ControllerResponse;
 
-    protected GeoapifyClient $apiGeoRequest;
-     protected WeatherapifyClient $apiWeatherRequest;
-
-    public function __construct(GeoapifyClient $apiGeoRequest, WeatherapifyClient $apiWeatherRequest)
+    public function __construct(
+        protected CommandBus $commandBus,
+        protected GeoapifyClient $apiGeoRequest, 
+        protected WeatherapifyClient $apiWeatherRequest
+    )
     {
-        $this->apiGeoRequest = $apiGeoRequest;
-        $this->apiWeatherRequest = $apiWeatherRequest;
     }
 
     public function list(): JsonResponse
@@ -65,21 +70,12 @@ class CityController extends Controller
     }
     public function create(Request $request): JsonResponse
     {
-        if ($errors = $this->validationErrors($request)) {
+        $command = new CreateCityCommand($request->name);
+        if ($errors = (new CreateCityValidator($command))->errors()) return $this->jsonValidate($errors);
+        $id = $this->commandBus->handle($command);
 
-            return $this->jsonValidate($errors);
-        }
-        $cords = $this->apiGeoRequest->getCoordinates($request->name);
-        $city = new City;
-        $city->name = $request->name;
-        $city->lat = $cords['lat'];
-        $city->lon = $cords['lon'];
-        $city->save();
-
-        return $this->jsonCreate();
+        return $this->jsonCreate(['id' => $id]);
     }
-
-    
 
     public function update(Request $request, int $id): JsonResponse
     {
@@ -119,9 +115,13 @@ class CityController extends Controller
         return $this->jsonDelete();
     }
 
-    public function testgeo(Request $request)
+    public function testMail()
     {
-        $this->apiGeoRequest->getCoordinates($request->name);
+        $weather = Weather::first();
+        $city = City::first();
+        $mailable = new AlertMail($weather, $city);
+        $test = Mail::to('tatpat02@gmail.com')->send($mailable);
+        dd($test);
     }
 
     public function testweather(Request $request)

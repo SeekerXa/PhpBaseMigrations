@@ -1,6 +1,8 @@
 <?php
+
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CityController;
+use Termwind\Components\Dd;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -24,6 +26,14 @@ Route::get('/addweather', [CityController::class, 'addWeather']);
 
 Route::get('/testweather', [CityController::class, 'testweather']);
 
-Route::get('/testgeo', [CityController::class, 'testgeo']);
+Route::get('/testmail', [CityController::class, 'testmail']);
 
 Route::get('/testHasMany', [CityController::class, 'testHasMany']);
+
+Route::get('/bocos', function () {
+    dd('jj');
+});
+
+
+
+

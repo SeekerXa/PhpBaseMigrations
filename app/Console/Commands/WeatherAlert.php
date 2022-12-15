@@ -3,10 +3,11 @@
 namespace App\Console\Commands;
 
 use App\CommandBus;
-use App\Mail\AlertMail;
 use App\Models\City;
+use App\Mail\AlertMail;
 use Illuminate\Console\Command;
 use App\Commands\CreateCityCommand;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use App\Validators\CreateCityValidator;
 
@@ -31,19 +32,18 @@ class WeatherAlert extends Command
             $command = new CreateCityCommand($cityName);
             if ($errors = (new CreateCityValidator($command))->errors()) return $this->jsonValidate($errors);
             $id = $this->commandBus->handle($command);
-            
         }
-        
+
         $email = $this->argument('email');
         $weather = $city->weathers()->latest()->first();
-        //$weather = Weather::where()->first();
+        if ($weather == null) {
+            $this->call('check-weather');
+            $weather = $city->weathers()->latest()->first();
+        }
+        
         $mailable = new AlertMail($weather, $city);
-        
         $test = Mail::to($email)->send($mailable);
-        dd('1234');
-        
-        
-        
+        Log::info('Email send to: ', [$this->argument('email')]);
         return Command::SUCCESS;
     }
 }

@@ -10,6 +10,9 @@ class Weather_Subscriber extends Authenticatable
 {
     use HasFactory;
 
+    
+    protected $table = 'weather_subscribers';
+    
 
     public function emails()
     {

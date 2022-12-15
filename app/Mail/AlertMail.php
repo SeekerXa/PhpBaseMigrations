@@ -29,7 +29,7 @@ class AlertMail extends Mailable
     public function envelope()
     {
           return new Envelope(
-            from: new Address(config('mail.from.address'), 'Pati'),
+            from: new Address(config('mail.from.address'), 'Weather Info'),
             subject: 'Weather alert',
         );
     }

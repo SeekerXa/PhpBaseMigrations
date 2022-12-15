@@ -1,8 +1,9 @@
 <?php
 
+use Termwind\Components\Dd;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CityController;
-use Termwind\Components\Dd;
+use App\Http\Controllers\SubscriberController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -36,4 +37,7 @@ Route::get('/bocos', function () {
 
 
 
+Route::get('/subscribers', [SubscriberController::class, 'listSubscribers']);
+Route::get('/emails', [SubscriberController::class, 'listEmails']);
 
+Route::post('/subscribers', [SubscriberController::class, 'create']);

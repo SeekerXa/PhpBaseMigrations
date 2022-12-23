@@ -3,16 +3,18 @@
 namespace App\Http\Controllers;
 
 use App\CommandBus;
+use App\Commands\Cities\UpdateCityCommand;
 use App\Mail\AlertMail;
 use App\Models\City;
 use App\Models\Weather;
 use App\Api\GeoapifyClient;
+use App\Validators\Cities\CityIdValidator;
 use Illuminate\Http\Request;
 use App\Api\WeatherapifyClient;
 use Illuminate\Support\Facades\DB;
-use App\Commands\CreateCityCommand;
+use App\Commands\Cities\CreateCityCommand;
 use Illuminate\Support\Facades\Mail;
-use App\Validators\CreateCityValidator;
+use App\Validators\Cities\CityNameValidator;
 use Illuminate\Support\Facades\Validator;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use App\Http\Controllers\Traits\ControllerResponse;
@@ -43,71 +45,36 @@ class CityController extends Controller
         return $this->jsonResponse($weather);
     }
 
-    public function validationErrors($request): ?array
-    {
-        $validator = Validator::make($request->all(), [
-            'name' => 'alpha|required|max:255',
-         ]);
-      
-         if($validator->fails())
-         {
-            return $validator->errors()->toArray();
-         }
-         else
-         {
-            return null;
-         }
-    }
-
-    public function idValidation(int $id): bool
-    {
-        if(City::where('id', $id)->exists()) {
-
-            return true;
-        }
-        // echo 'missing id';
-        return false;
-    }
-    public function create(Request $request): JsonResponse
+      public function create(Request $request): JsonResponse
     {
         $command = new CreateCityCommand($request->name);
-        if ($errors = (new CreateCityValidator($command))->errors()) return $this->jsonValidate($errors);
-        $id = $this->commandBus->handle($command);
+        if ($errors = (new CityNameValidator($command->cityName))->errors()) return $this->jsonValidate($errors);
+        $newCity = $this->commandBus->handle($command);
 
-        return $this->jsonCreate(['id' => $id]);
+        return $this->jsonResponse($newCity);
     }
 
     public function update(Request $request, int $id): JsonResponse
     {
-
-        if($errors = $this->validationErrors($request)){
-            return $this->jsonValidate($errors);
-        }
-
-        if(!$this->idValidation($id)){
+        
+        if((new CityIdValidator())->idDoesNotExist($id)){
             return $this->jsonMissingId();
         }
+        if ($errors = (new CityNameValidator($request->cityName))->errors()) {
+            return $this->jsonValidate($errors);
+        }   
+        $command = new UpdateCityCommand($request->cityName,$id);
+        $updatedCity = $this->commandBus->handle($command);
 
-        $cords = $this->apiGeoRequest->getCoordinates($request->name);
-        $city=DB::table('cities')
-         ->where('id', $id)
-         ->update(
-             ['name'=> $request->name,
-            'lat'=> $cords['lat'],
-             'lon'=> $cords['lon']
-             ]
-        );
-        return $this->jsonResponse($city);
-        
+        return $this->jsonResponse($updatedCity);     
     }
 
     public function destroy(Request $request,int $id): JsonResponse
     {
-        if(!$this->idValidation($id))
-        {
+        if((new CityIdValidator())->idDoesNotExist($id)){
             return $this->jsonMissingId();
         }
-        $this->idValidation($id);
+        
         DB::table('cities')
         ->where('id', $id)
         ->delete();

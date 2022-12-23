@@ -19,7 +19,7 @@ class CheckWeather extends Command
      *
      * @var string
      */
-    protected $signature = 'check-weather';
+    protected $signature = 'check:weather';
 
     /**
      * The console command description.

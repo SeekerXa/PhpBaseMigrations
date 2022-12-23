@@ -9,7 +9,8 @@ use Illuminate\Console\Command;
 use App\Commands\CreateCityCommand;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
-use App\Validators\CreateCityValidator;
+use App\Validators\CityNameValidator;
+use Illuminate\Support\Facades\Validator;
 
 class WeatherAlert extends Command
 {
@@ -24,26 +25,28 @@ class WeatherAlert extends Command
 
     public function handle()
     {
-        $cityName =(string) $this->argument('cityName');
-        $city=City::where('name', $cityName)->first();
 
-        if($city== null)
-        {
+        $cityName = (string) $this->argument('cityName');
+        $city = City::where('name', $cityName)->first();
+
+        if ($city == null) {
             $command = new CreateCityCommand($cityName);
-            if ($errors = (new CreateCityValidator($command))->errors()) return $this->jsonValidate($errors);
+            if ($errors = (new CityNameValidator($command))->errors())
+                return $this->jsonValidate($errors);
             $id = $this->commandBus->handle($command);
+            $city = City::where('name', $cityName)->first();
+            $this->call('check:weather');
         }
-
         $email = $this->argument('email');
+
+        if (is_null($weather = $city->weathers()->latest()->first())) {$this->call('check:weather');}
+
         $weather = $city->weathers()->latest()->first();
-        if ($weather == null) {
-            $this->call('check-weather');
-            $weather = $city->weathers()->latest()->first();
-        }
-        
         $mailable = new AlertMail($weather, $city);
-        $test = Mail::to($email)->send($mailable);
+        Mail::to($email)->send($mailable);
+
         Log::info('Email send to: ', [$this->argument('email')]);
         return Command::SUCCESS;
+        
     }
 }

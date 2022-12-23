@@ -1,13 +1,12 @@
 <?php
 
-namespace App\Validators;
+namespace App\Validators\Cities;
 
-use App\Commands\CreateCityCommand;
 use Illuminate\Support\Facades\Validator;
 
-class CreateCityValidator
+class CityNameValidator
 {
-    public function __construct(protected CreateCityCommand $command) {
+    public function __construct(protected string $cityName) {
 
     }
 
@@ -15,7 +14,7 @@ class CreateCityValidator
     {
         $validator = Validator::make(
             [
-               'name' => $this->command->cityName 
+               'name' => $this->cityName
             ], 
             [
                 'name' => 'alpha|required|max:255',

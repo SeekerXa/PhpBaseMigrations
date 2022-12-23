@@ -3,15 +3,12 @@
 namespace App\Console\Commands;
 
 use App\CommandBus;
-use App\Models\Email;
-use App\Mail\AlertMail;
 use Illuminate\Support\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
-use App\Console\Commands\WeatherAlert;
-use Illuminate\Support\Facades\Artisan;
+use App\Commands\Emails\CreateEmailCommand;
+
 
 
 class SubscriberWeatherSend extends Command
@@ -23,7 +20,14 @@ class SubscriberWeatherSend extends Command
     {
         parent::__construct();
     }  
-    
+
+    public function createEmail($email)   
+    {
+        $dataTime = Carbon::now();
+        $command = new CreateEmailCommand('Weather_Email',$email,$dataTime);
+        return $this->commandBus->handle($command);
+       
+    }
     public function handle()
     {
         $actualHour = (string)Carbon::now()->hour;
@@ -36,6 +40,7 @@ class SubscriberWeatherSend extends Command
                     'cityName' => $sub->city,
                     'email' => $sub->email
                 ]);
+                $this->createEmail($sub->email);
             }
         }
         else Log::info('Noone wants mail at this hour!');

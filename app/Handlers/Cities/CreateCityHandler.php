@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Handlers;
+namespace App\Handlers\Cities;
 
 use App\Models\City;
 use App\Api\GeoapifyClient;
-use App\Commands\CreateCityCommand;
+use App\Commands\Cities\CreateCityCommand;
 
 class CreateCityHandler
 {
@@ -22,6 +22,6 @@ class CreateCityHandler
         $city->lon = $cords['lon'];
         $city->save();
 
-        return $city->getId();
+        return $city;
     }
 }

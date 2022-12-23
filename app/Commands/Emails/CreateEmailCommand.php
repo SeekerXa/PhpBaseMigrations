@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Commands\WeatherSubscriber;
+namespace App\Commands\Emails;
 
 
 
 
-class CreateWeatherSubscriberCommand 
+class CreateEmailCommand 
 {
     public function __construct(
-        public string $city,
+        public string $type,
         public string $email,
         public string $sendingHour
     ) {

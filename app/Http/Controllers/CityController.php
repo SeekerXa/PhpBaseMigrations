@@ -3,19 +3,19 @@
 namespace App\Http\Controllers;
 
 use App\CommandBus;
-use App\Commands\Cities\UpdateCityCommand;
-use App\Mail\AlertMail;
 use App\Models\City;
+use App\Mail\AlertMail;
 use App\Models\Weather;
 use App\Api\GeoapifyClient;
-use App\Validators\Cities\CityIdValidator;
 use Illuminate\Http\Request;
 use App\Api\WeatherapifyClient;
 use Illuminate\Support\Facades\DB;
-use App\Commands\Cities\CreateCityCommand;
 use Illuminate\Support\Facades\Mail;
+use App\Commands\Cities\CreateCityCommand;
+use App\Commands\Cities\DeleteCityCommand;
+use App\Commands\Cities\UpdateCityCommand;
+use App\Validators\Cities\CityIdValidator;
 use App\Validators\Cities\CityNameValidator;
-use Illuminate\Support\Facades\Validator;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use App\Http\Controllers\Traits\ControllerResponse;
 
@@ -75,9 +75,9 @@ class CityController extends Controller
             return $this->jsonMissingId();
         }
         
-        DB::table('cities')
-        ->where('id', $id)
-        ->delete();
+        $command = new DeleteCityCommand($id);
+        $this->commandBus->handle($command);
+
 
         return $this->jsonDelete();
     }

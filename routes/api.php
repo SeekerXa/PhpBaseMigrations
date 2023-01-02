@@ -41,3 +41,6 @@ Route::get('/subscribers', [SubscriberController::class, 'listSubscribers']);
 Route::get('/emails', [SubscriberController::class, 'listEmails']);
 
 Route::post('/subscribers', [SubscriberController::class, 'create']);
+
+Route::put('/subscribers/{id}', [SubscriberController::class, 'update']);
+Route::delete('/subscribers/{id}', [SubscriberController::class, 'destroy']);

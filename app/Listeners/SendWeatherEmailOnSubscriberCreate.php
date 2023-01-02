@@ -6,9 +6,8 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use App\Events\WeatherSubscriberCreateEvent;
-use PharIo\Manifest\Email;
 
-class SendEmailsOnSubscriberCreate implements ShouldQueue
+class SendWeatherEmailOnSubscriberCreate implements ShouldQueue
 {
     /**
      * Create the event listener.
@@ -19,7 +18,7 @@ class SendEmailsOnSubscriberCreate implements ShouldQueue
     {
         //
     }
-
+    
     /**
      * Handle the event.
      *
@@ -28,7 +27,7 @@ class SendEmailsOnSubscriberCreate implements ShouldQueue
      */
     public function handle(WeatherSubscriberCreateEvent $event)
     {
-        sleep(2);
-        Log::info('event sending createsub mail on '.$event->subscriber->email);
+        sleep(4);
+        Log::info('event sending weather mail on '.$event->subscriber->email);
     }
-} 
+}

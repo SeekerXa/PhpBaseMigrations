@@ -1,5 +1,7 @@
 <?php
 
+use App\Events\WeatherSubscriberCreateEvent;
+use App\Models\WeatherSubscriber;
 use Termwind\Components\Dd;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CityController;
@@ -31,8 +33,10 @@ Route::get('/testmail', [CityController::class, 'testmail']);
 
 Route::get('/testHasMany', [CityController::class, 'testHasMany']);
 
-Route::get('/bocos', function () {
-    dd('jj');
+Route::get('/test', function () {
+    $subscriber = WeatherSubscriber::first();
+    $event = WeatherSubscriberCreateEvent::dispatch($subscriber);
+    dd($event);
 });
 
 

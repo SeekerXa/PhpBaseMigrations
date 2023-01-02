@@ -2,6 +2,9 @@
 
 namespace App\Providers;
 
+use App\Events\WeatherSubscriberCreateEvent;
+use App\Listeners\SendEmailsOnSubscriberCreate;
+use App\Listeners\SendWeatherEmailOnSubscriberCreate;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
@@ -18,6 +21,10 @@ class EventServiceProvider extends ServiceProvider
         Registered::class => [
             SendEmailVerificationNotification::class,
         ],
+        WeatherSubscriberCreateEvent::class => [
+            SendEmailsOnSubscriberCreate::class,
+            SendWeatherEmailOnSubscriberCreate::class,
+        ]
     ];
 
     /**
